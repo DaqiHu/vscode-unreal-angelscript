@@ -97,6 +97,89 @@ describe('PEG Grammar - Class with Interface Implementation', () => {
         assert.ok(result.superclass, 'Expected a superclass string');
         assert.ok(result.superclass.value.includes('AActor'), 'Should contain AActor');
     });
+
+    it('T3.17: class with comma-separated AActor and IFoo captures full text after colon', () => {
+        // The PEG grammar captures the entire comma-separated string as a single superclass.
+        // as_parser.ts's GenerateTypeInformation splits and interprets this.
+        const result = parseDecl('class AImpl : AActor, IFoo');
+        assert.equal(result.type, nt.ClassDefinition, 'Expected ClassDefinition');
+        assert.equal(result.name.value, 'AImpl');
+        assert.ok(result.superclass, 'Expected a superclass string');
+        assert.ok(result.superclass.value.startsWith('AActor'), 'Should start with AActor');
+        assert.ok(result.superclass.value.includes(', '), 'Should contain comma separator');
+    });
+
+    it('T3.17: class with only interface as superclass', () => {
+        const result = parseDecl('class AImpl : IFoo');
+        assert.equal(result.type, nt.ClassDefinition);
+        assert.equal(result.name.value, 'AImpl');
+        assert.ok(result.superclass, 'Expected a superclass');
+        assert.ok(result.superclass.value.startsWith('IFoo'), 'Should start with IFoo');
+    });
+
+    it('T3.17: class with two interfaces and no base class', () => {
+        const result = parseDecl('class AImpl : IFoo, IBar');
+        assert.equal(result.type, nt.ClassDefinition);
+        assert.equal(result.name.value, 'AImpl');
+        assert.ok(result.superclass, 'Expected a superclass');
+        assert.ok(result.superclass.value.includes('IFoo'), 'Should contain IFoo');
+        assert.ok(result.superclass.value.includes('IBar'), 'Should contain IBar');
+    });
+
+    it('T3.17: class with interface after UObject base', () => {
+        const result = parseDecl('class AMyActor : AActor, IFoo, IBar');
+        assert.equal(result.type, nt.ClassDefinition);
+        assert.equal(result.name.value, 'AMyActor');
+        assert.ok(result.superclass, 'Expected a superclass');
+        assert.ok(result.superclass.value.startsWith('AActor'), 'Should start with AActor');
+        assert.ok(result.superclass.value.includes('IFoo'), 'Should contain IFoo');
+        assert.ok(result.superclass.value.includes('IBar'), 'Should contain IBar');
+    });
+});
+
+describe('PEG Grammar - Interface Edge Cases', () => {
+
+    it('T3.6: interface with multi-level namespace superclass', () => {
+        const result = parseDecl('interface IFoo : Core::System::IInterface');
+        assert.ok(result, 'Expected a parse result');
+        assert.equal(result.type, nt.InterfaceDefinition);
+        assert.equal(result.name.value, 'IFoo');
+        assert.ok(result.superclass);
+        assert.equal(result.superclass.value, 'Core::System::IInterface');
+    });
+
+    it('T3.4: interface with single letter name', () => {
+        const result = parseDecl('interface I');
+        assert.equal(result.type, nt.InterfaceDefinition);
+        assert.equal(result.name.value, 'I');
+    });
+
+    it('T3.4: interface with two-character name', () => {
+        const result = parseDecl('interface IF');
+        assert.equal(result.type, nt.InterfaceDefinition);
+        assert.equal(result.name.value, 'IF');
+    });
+
+    it('T3.17: class with multiple comma-separated interfaces', () => {
+        // The PEG grammar captures the full comma-separated text as a single superclass string.
+        // as_parser.ts's GenerateTypeInformation splits this into base class + interfaces.
+        const result = parseDecl('class AImpl : AActor, IFoo, IBar');
+        assert.equal(result.type, nt.ClassDefinition);
+        assert.equal(result.name.value, 'AImpl');
+        assert.ok(result.superclass, 'Expected a superclass string');
+        assert.equal(result.superclass.value, 'AActor, IFoo, IBar',
+            'PEG should capture the full comma-separated list');
+    });
+
+    it('T3.17: interface with comma-separated superclass list', () => {
+        // Interfaces can also inherit from multiple interfaces (e.g. interface IFoo : IBar, IBaz)
+        const result = parseDecl('interface IFoo : IBar, IBaz');
+        assert.equal(result.type, nt.InterfaceDefinition);
+        assert.equal(result.name.value, 'IFoo');
+        assert.ok(result.superclass);
+        assert.equal(result.superclass.value, 'IBar, IBaz',
+            'PEG should capture comma-separated interface superclasses');
+    });
 });
 
 describe('PEG Grammar - Regression (T3.21)', () => {

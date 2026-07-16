@@ -632,6 +632,14 @@ function GetHoverForType(hoveredType : typedb.DBType) : Hover
         else
             hover += hoveredType.name;
     }
+    else if (hoveredType.isInterface)
+    {
+        hover += "interface " + hoveredType.name;
+        if (hoveredType.supertype)
+            hover += " : "+hoveredType.supertype;
+        else
+            hover += " : IInterface";
+    }
     else
     {
         if (hoveredType.isStruct)

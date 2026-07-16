@@ -764,6 +764,11 @@ export class DBType implements DBSymbol
         else
             this.isEnum = false;
 
+        if ('isInterface' in input)
+            this.isInterface = input['isInterface'];
+        else
+            this.isInterface = false;
+
         let delegateSignatureMethod : DBSymbol = null;
         if ('isEvent' in input)
         {
