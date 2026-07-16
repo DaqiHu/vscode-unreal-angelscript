@@ -764,11 +764,39 @@ function AddScopeSymbols(asmodule : scriptfiles.ASModule, scope : scriptfiles.AS
         || scope.scopetype == scriptfiles.ASScopeType.Global
         || scope.scopetype == scriptfiles.ASScopeType.Namespace
         || scope.scopetype == scriptfiles.ASScopeType.Enum
+        || scope.scopetype == scriptfiles.ASScopeType.Interface
         )
     {
         let varKind : SymbolKind = SymbolKind.Variable;
 
-        if (scope.scopetype == scriptfiles.ASScopeType.Class
+        if (scope.scopetype == scriptfiles.ASScopeType.Interface)
+        {
+            let dbtype = scope.getDatabaseType();
+            if (dbtype)
+            {
+                let scopeSymbol = <DocumentSymbol> {};
+                if (dbtype.moduleScopeEnd != -1)
+                    scopeSymbol.range = asmodule.getRange(dbtype.moduleOffset, dbtype.moduleScopeEnd);
+                else if (dbtype.moduleOffsetEnd != -1)
+                    scopeSymbol.selectionRange = asmodule.getRange(dbtype.moduleOffset, dbtype.moduleOffsetEnd);
+                else
+                    scopeSymbol.range = asmodule.getRange(dbtype.moduleOffset, dbtype.moduleOffset);
+
+                if (dbtype.moduleOffsetEnd != -1)
+                    scopeSymbol.selectionRange = asmodule.getRange(dbtype.moduleOffset, dbtype.moduleOffsetEnd);
+                else
+                    scopeSymbol.selectionRange = asmodule.getRange(dbtype.moduleOffset, dbtype.moduleOffset);
+
+                scopeSymbol.name = dbtype.name;
+                scopeSymbol.kind = SymbolKind.Interface;
+                scopeSymbol.detail = "interface";
+                scopeSymbol.children = new Array<DocumentSymbol>();
+
+                symbols.push(scopeSymbol);
+                symbols = scopeSymbol.children;
+            }
+        }
+        else if (scope.scopetype == scriptfiles.ASScopeType.Class
             || scope.scopetype == scriptfiles.ASScopeType.Enum)
         {
             let dbtype = scope.getDatabaseType();

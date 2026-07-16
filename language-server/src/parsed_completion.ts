@@ -1190,7 +1190,7 @@ function AddCompletionsFromKeywords(context : CompletionContext, completions : A
         && (!context.isSubExpression && !context.isRightExpression))
     {
         AddCompletionsFromKeywordList(context, [
-            "delegate", "event", "class", "struct",
+            "delegate", "event", "interface", "class", "struct",
             "property"
         ], completions);
 
@@ -1864,7 +1864,9 @@ export function AddCompletionsFromType(context : CompletionContext, curtype : ty
                 return;
 
             let kind : CompletionItemKind = CompletionItemKind.Class;
-            if (dbtype.isEnum)
+            if (dbtype.isInterface)
+                kind = CompletionItemKind.Interface;
+            else if (dbtype.isEnum)
             {
                 if (context.isInsideType && !context.priorTypeWasNamespace)
                     return;

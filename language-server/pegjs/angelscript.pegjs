@@ -167,6 +167,7 @@ global_declaration
     / event_decl
     / struct_decl
     / class_decl
+    / interface_decl
     / enum_decl
     / namespace_decl
     / asset_decl
@@ -943,7 +944,8 @@ octal_literal = "0" "o" [0-8]*
 
 keyword
     = &"i" @(
-        "if"
+        "interface"
+        / "if"
     )
     / &"r" @(
         "return"
@@ -1329,6 +1331,22 @@ class_decl
         let node = Compound(range(), n.ClassDefinition, null);
         node.name = name;
         node.macro = macro;
+        node.superclass = superclass;
+        return node;
+    }
+
+interface_decl
+    = &"i" "interface" _ name:identifier superclass:(
+        _ ":" @(_ @(
+            identifier_name (_ ":" ":" _ identifier_name)*
+            {
+                return Identifier(range(), text());
+            }
+        ))?
+    )?
+    {
+        let node = Compound(range(), n.InterfaceDefinition, null);
+        node.name = name;
         node.superclass = superclass;
         return node;
     }

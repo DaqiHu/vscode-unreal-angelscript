@@ -336,7 +336,7 @@ export function GetAPISearch(filter : string) : any
             }
             else if (symbol instanceof typedb.DBType)
             {
-                if (!symbol.declaredModule && !symbol.isEnum && !symbol.isTemplateInstantiation && !symbol.isTemplateType() && !symbol.isDelegate && !symbol.isEvent)
+                if (!symbol.declaredModule && !symbol.isEnum && !symbol.isInterface && !symbol.isTemplateInstantiation && !symbol.isTemplateType() && !symbol.isDelegate && !symbol.isEvent)
                     searchType(symbol);
             }
         }, false);

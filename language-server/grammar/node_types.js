@@ -46,6 +46,7 @@ module.exports = {
 
     StructDefinition: indexed ? i++ : "StructDefinition",
     ClassDefinition: indexed ? i++ : "ClassDefinition",
+    InterfaceDefinition: indexed ? i++ : "InterfaceDefinition",
     EnumDefinition: indexed ? i++ : "EnumDefinition",
     AssetDefinition: indexed ? i++ : "AssetDefinition",
     NamespaceDefinition: indexed ? i++ : "NamespaceDefinition",

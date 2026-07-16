@@ -47,6 +47,7 @@ export let node_types = require("../grammar/node_types.js");
 export let ASKeywords = [
     "for", "if", "enum", "return", "continue", "break", "class", "struct", "default",
     "void", "const", "delegate", "event", "else", "while", "case", "Cast", "namespace",
+    "interface",
     "UFUNCTION", "UPROPERTY", "UCLASS", "USTRUCT", "nullptr", "true", "false", "this", "auto",
     "final", "property", "override", "mixin", "switch", "fallthrough",
 ];
@@ -55,6 +56,7 @@ export enum ASScopeType
 {
     Global,
     Class,
+    Interface,
     Function,
     Enum,
     Code,
@@ -1191,7 +1193,7 @@ function LoadModule(module : ASModule)
 }
 
 // Use regex to lift out types, namespaces and global functions so resolve can find them later
-let re_preparse_type = /\s*(class|struct|namespace|enum)\s+([A-Za-z0-9_]+)(\s*:\s*([A-Za-z0-9_]+))?\s*\{/g;
+let re_preparse_type = /\s*(class|interface|struct|namespace|enum)\s+([A-Za-z0-9_]+)(\s*:\s*([A-Za-z0-9_]+))?\s*\{/g;
 let re_preparse_function = /(\n|^)[ \t]*((mixin|delegate|event)[ \t]+)?((const[ \t]+)?([A-Za-z_0-9]+(\<[A-Za-z0-9_]+(,\s*[A-Za-z0-9_]+)*\>)?)([ \t]*&)?)[\t ]+([A-Za-z0-9_]+)\(((.|\n|\r)*?)\)/g;
 function PreParseTypes(module : ASModule)
 {
@@ -1851,6 +1853,41 @@ function GenerateTypeInformation(scope : ASScope)
                 dbtype.macroMeta = new Map<string, string>();
 
                 MakeMacroSpecifiers(classdef.macro, dbtype.macroSpecifiers, dbtype.macroMeta);
+
+                // Check if we have keywords
+                let keywords = dbtype.macroMeta.get("scriptkeywords");
+                if (keywords)
+                    dbtype.keywords = keywords.split(" ");
+            }
+
+            ExtendScopeToStatement(scope, scope.previous);
+            dbtype.moduleScopeStart = scope.start_offset;
+            dbtype.moduleScopeEnd = scope.end_offset;
+        }
+        // Interface definition in global scope
+        else if (scope.previous.ast.type == node_types.InterfaceDefinition)
+        {
+            scope.declaration = scope.previous;
+
+            let interfacedef = scope.previous.ast;
+            let dbtype = AddDBType(scope, interfacedef.name.value);
+            dbtype.supertype = interfacedef.superclass ? interfacedef.superclass.value : "UInterface";
+            dbtype.isInterface = true;
+            if (interfacedef.documentation)
+                dbtype.documentation = typedb.FormatDocumentationComment(interfacedef.documentation);
+
+            dbtype.moduleOffset = scope.previous.start_offset + interfacedef.name.start;
+            dbtype.moduleOffsetEnd = scope.previous.start_offset + interfacedef.name.end;
+
+            scope.module.types.push(dbtype);
+            scope.dbtype = dbtype;
+
+            if (interfacedef.macro)
+            {
+                dbtype.macroSpecifiers = new Map<string, string>();
+                dbtype.macroMeta = new Map<string, string>();
+
+                MakeMacroSpecifiers(interfacedef.macro, dbtype.macroSpecifiers, dbtype.macroMeta);
 
                 // Check if we have keywords
                 let keywords = dbtype.macroMeta.get("scriptkeywords");
@@ -5934,6 +5971,10 @@ function DetermineScopeType(scope : ASScope)
             if (ast_type == node_types.ClassDefinition)
             {
                 scope.scopetype = ASScopeType.Class;
+            }
+            else if (ast_type == node_types.InterfaceDefinition)
+            {
+                scope.scopetype = ASScopeType.Interface;
             }
             else if (ast_type == node_types.StructDefinition)
             {

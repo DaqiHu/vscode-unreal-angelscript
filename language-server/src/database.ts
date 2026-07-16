@@ -635,6 +635,7 @@ export class DBType implements DBSymbol
     namespace : DBNamespace;
 
     isStruct : boolean;
+    isInterface : boolean = false;
     isEnum : boolean;
     isDelegate : boolean = false;
     isEvent : boolean = false;
