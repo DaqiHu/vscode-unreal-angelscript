@@ -85,7 +85,16 @@ export function* FindReferences(uri : string, position : Position) : any
         let checkParent = typedb.GetTypeByName(findSymbol.container_type);
         while (checkParent)
         {
-            let nextParent = checkParent.getSuperType();
+            // Handle comma-separated supertype (e.g., "AActor, IFoo, IBar")
+            // Take only the first part before any comma as the parent type to traverse
+            let supertypeStr = checkParent.supertype;
+            let nextParent: typedb.DBType = null;
+            if (supertypeStr)
+            {
+                let commaIdx = supertypeStr.indexOf(',');
+                let searchType = commaIdx >= 0 ? supertypeStr.substring(0, commaIdx).trim() : supertypeStr;
+                nextParent = typedb.GetTypeByName(searchType);
+            }
             if (nextParent && nextParent.findFirstSymbol(findSymbol.symbol_name, typedb.DBAllowSymbol.Functions))
             {
                 checkParent = nextParent;

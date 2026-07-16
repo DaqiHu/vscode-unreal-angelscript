@@ -1320,12 +1320,12 @@ struct_decl
 
 class_decl
     = macro:(@uclass_macro _)? &"c" "class" _ name:identifier superclass:(
-        _ ":" @(_ @(
-            identifier_name (_ ":" ":" _ identifier_name)*
+        _ ":" _ @(
+            raw:$([^{;]*)
             {
-                return Identifier(range(), text());
+                return Identifier(range(), raw.trim());
             }
-        ))?
+        )?
     )?
     {
         let node = Compound(range(), n.ClassDefinition, null);
@@ -1337,12 +1337,12 @@ class_decl
 
 interface_decl
     = &"i" "interface" _ name:identifier superclass:(
-        _ ":" @(_ @(
-            identifier_name (_ ":" ":" _ identifier_name)*
+        _ ":" _ @(
+            raw:$([^{;]*)
             {
-                return Identifier(range(), text());
+                return Identifier(range(), raw.trim());
             }
-        ))?
+        )?
     )?
     {
         let node = Compound(range(), n.InterfaceDefinition, null);

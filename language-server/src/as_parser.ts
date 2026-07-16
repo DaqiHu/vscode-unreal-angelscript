@@ -1837,7 +1837,22 @@ function GenerateTypeInformation(scope : ASScope)
 
             let classdef = scope.previous.ast;
             let dbtype = AddDBType(scope, classdef.name.value);
-            dbtype.supertype = classdef.superclass ? classdef.superclass.value : "UObject";
+            // Parse superclass text - may contain ", IFoo, IBar" interfaces
+            let superclassText = classdef.superclass ? classdef.superclass.value : null;
+            if (superclassText) {
+                // Split by comma, take first as main supertype, trim whitespace
+                let parts = superclassText.split(',').map((s: string) => s.trim());
+                dbtype.supertype = parts[0] || "UObject";
+                // Remaining parts (if any) are implemented interfaces
+                // Store for future use in interface resolution
+                if (parts.length > 1) {
+                    // Store interface names for later processing
+                    // @ts-ignore - used by the LSP for interface resolution
+                    (dbtype as any)._interfaceNames = parts.slice(1);
+                }
+            } else {
+                dbtype.supertype = "UObject";
+            }
             if (classdef.documentation)
                 dbtype.documentation = typedb.FormatDocumentationComment(classdef.documentation);
 
@@ -1871,7 +1886,14 @@ function GenerateTypeInformation(scope : ASScope)
 
             let interfacedef = scope.previous.ast;
             let dbtype = AddDBType(scope, interfacedef.name.value);
-            dbtype.supertype = interfacedef.superclass ? interfacedef.superclass.value : "UInterface";
+            // Parse superclass text - may contain ", IFoo, IBar" interfaces
+            let superclassText = interfacedef.superclass ? interfacedef.superclass.value : null;
+            if (superclassText) {
+                let parts = superclassText.split(',').map((s: string) => s.trim());
+                dbtype.supertype = parts[0] || "UInterface";
+            } else {
+                dbtype.supertype = "UInterface";
+            }
             dbtype.isInterface = true;
             if (interfacedef.documentation)
                 dbtype.documentation = typedb.FormatDocumentationComment(interfacedef.documentation);
