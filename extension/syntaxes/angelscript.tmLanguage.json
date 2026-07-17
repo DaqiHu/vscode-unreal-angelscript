@@ -3,8 +3,38 @@
     "scopeName": "source.angelscript",
     "patterns": [
         {
+            "name": "meta.class.angelscript",
+            "begin": "\\b(class|interface|struct)\\s+([A-Za-z_][A-Za-z0-9_]*)",
+            "beginCaptures": {
+                "1": {
+                    "name": "keyword.declaration.angelscript"
+                },
+                "2": {
+                    "name": "entity.name.type.angelscript"
+                }
+            },
+            "end": "(?=\\{)",
+            "patterns": [
+                {
+                    "include": "#comments"
+                },
+                {
+                    "match": ":",
+                    "name": "punctuation.separator.colon.angelscript"
+                },
+                {
+                    "match": ",",
+                    "name": "punctuation.separator.comma.angelscript"
+                },
+                {
+                    "match": "[A-Za-z_][A-Za-z0-9_]+",
+                    "name": "entity.other.inherited-class.angelscript"
+                }
+            ]
+        },
+        {
             "name": "keyword.declaration.angelscript",
-            "match": "\\b(class|interface|struct|delegate|event|import|enum|namespace)\\b"
+            "match": "\\b(delegate|event|import|enum|namespace)\\b"
         },
         {
             "name": "keyword.statement.angelscript",
@@ -50,7 +80,6 @@
             "match": "::",
             "name": "punctuation.separator.namespace.access.angelscript"
         },
-
         {
             "name": "meta.unrealmacro.property.angelsript",
             "begin": "(UPROPERTY)\\(",
@@ -201,7 +230,6 @@
                 }
             ]
         },
-
         {
             "match": "\\b(asset) ([A-Za-z0-9_]+) (of) ([A-Za-z0-9_]+)\\b",
             "captures": {
@@ -213,13 +241,11 @@
                 }
             }
         },
-
         {
             "name": "meta.preprocessor.angelsript",
             "begin": "^\\s*#",
             "end": "(?=\\n)"
         },
-
         {
             "begin": "f\"",
             "beginCaptures": {
@@ -268,7 +294,6 @@
                 }
             ]
         },
-
         {
             "include": "#comments"
         },
@@ -310,8 +335,7 @@
                     },
                     "end": "(?=\\n)",
                     "patterns": [
-                        {
-                        }
+                        {}
                     ]
                 }
             ]

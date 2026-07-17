@@ -652,6 +652,11 @@ function AddScopeNamingConventionDiagnostics(scope : scriptfiles.ASScope, diagno
                 hasSuggestion = true;
             }
         }
+        else if (scopeType.isInterface)
+        {
+            // Interfaces use Java/C#-style I-prefix naming (IFoo, IBar),
+            // not Unreal's UI-prefix. Skip naming convention check.
+        }
         else if (IsMaybeActorType(scopeType))
         {
             if (suggestedName.length >= 1 && suggestedName[0] != 'A')
