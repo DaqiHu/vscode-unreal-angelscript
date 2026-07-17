@@ -1,9 +1,9 @@
 {
-    "name": "unreal-angelscript",
-    "displayName": "Unreal Angelscript",
-    "description": "Language Server and Debug Adapter for use with the UnrealEngine-Angelscript plugin from https://github.com/Hazelight/UnrealEngine-Angelscript",
-    "version": "1.9.3",
-    "publisher": "Hazelight",
+    "name": "unreal-angelscript-uetf",
+    "displayName": "Unreal Angelscript (UETF)",
+    "description": "Language Server and Debug Adapter for UnrealEngine-Angelscript with AS interface support (UETF fork).",
+    "version": "2.0.0",
+    "publisher": "DaqiHu",
     "icon": "resources/angelscript_unreal.png",
     "engines": {
         "vscode": "^1.65.0"
@@ -688,7 +688,8 @@
         "watch:language-server": "cd language-server && node esbuild.js --watch",
         "postinstall": "cd extension && npm install && cd ../language-server && npm install && cd ..",
         "pegjs:compile": "cd language-server/pegjs && peggy angelscript.pegjs --allowed-start-rules start,start_global,start_class,start_enum",
-        "pegjs:test": "cd language-server/pegjs && peggy angelscript.pegjs --allowed-start-rules start,start_global,start_class,start_enum --trace --test-file test.as -S start"
+        "pegjs:test": "node language-server/pegjs/run_peg_tests.js",
+        "pegjs:test:legacy": "cd language-server/pegjs && peggy angelscript.pegjs --allowed-start-rules start,start_global,start_class,start_enum --trace --test-file test.as -S start"
     },
     "devDependencies": {
         "peggy": "^5.1.0"
