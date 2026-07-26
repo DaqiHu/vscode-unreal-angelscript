@@ -2,3 +2,7 @@ node_modules
 *.vsix
 dist
 out
+
+# Generated JS/JS map files from TypeScript compilation
+language-server/src/*.js
+language-server/src/*.js.map
